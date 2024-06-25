@@ -16,4 +16,4 @@ database:
 
 s3server:
   region: "eu-north-1"
-  bucket_name: "converter.image"
+  bucket_name: "my-bucket-webp"
