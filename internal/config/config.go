@@ -32,6 +32,7 @@ type Database struct {
 }
 
 type S3Server struct {
+	Endpoint  string `yaml:"endpoint"`
 	Region    string `yaml:"region"`
 	Bucket    string `yaml:"bucket_name"`
 	AccessKey string

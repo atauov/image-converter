@@ -15,5 +15,7 @@ database:
   ssl_mode: "disable"
 
 s3server:
+  endpoint: "s3.amazonaws.com"
   region: "eu-north-1"
   bucket_name: "my-bucket-webp"
+  url: "http://dwah87zivx7wf.cloudfront.net" #CDN domain

@@ -3,7 +3,6 @@ package handler
 import (
 	"github.com/atauov/image-converter/internal/service"
 	"github.com/gin-gonic/gin"
-	"log/slog"
 )
 
 type Handlers struct {
@@ -16,7 +15,7 @@ func NewHandler(services *service.Service) *Handlers {
 	}
 }
 
-func (h *Handlers) InitRoutes(logger slog.Logger) *gin.Engine {
+func (h *Handlers) InitRoutes() *gin.Engine {
 	router := gin.New()
 
 	api := router.Group("/api")

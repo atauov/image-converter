@@ -28,10 +28,15 @@ func (h *Handlers) uploadImage(c *gin.Context) {
 	fileType := file.Header.Get("Content-Type")
 	switch fileType {
 	case TYPE_JPEG, TYPE_PNG, TYPE_WEBP:
-		fallthrough
 	default:
 		c.JSON(http.StatusBadRequest, resp.Error("file extension must be JPEG, PNG or WEBP"))
 		return
 	}
+
+	open, err := file.Open()
+	if err != nil {
+		c.JSON(http.StatusBadRequest, resp.Error("failed to open file"))
+	}
+	defer open.Close()
 
 }

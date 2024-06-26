@@ -53,7 +53,7 @@ func main() {
 	srv := new(app.Server)
 
 	go func() {
-		if err = srv.Run(&cfg.HTTPServer, handlers.InitRoutes(log)); err != nil {
+		if err = srv.Run(&cfg.HTTPServer, handlers.InitRoutes()); err != nil {
 			log.Error("failed to start http server", sl.Err(err))
 			return
 		}

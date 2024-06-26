@@ -17,7 +17,7 @@ func (s *Server) Run(cfg *config.HTTPServer, handler http.Handler) error {
 		ReadTimeout:    cfg.Timeout,
 		WriteTimeout:   cfg.Timeout,
 		IdleTimeout:    cfg.IdleTimeout,
-		MaxHeaderBytes: 1 << 20,
+		MaxHeaderBytes: 1 << 20, // 1 MB
 	}
 
 	return s.httpServer.ListenAndServe()
