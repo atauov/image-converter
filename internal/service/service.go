@@ -3,7 +3,6 @@ package service
 import (
 	"github.com/atauov/image-converter/internal/models"
 	"github.com/atauov/image-converter/internal/repository"
-	"github.com/minio/minio-go/v7"
 )
 
 type Service struct {
@@ -19,12 +18,7 @@ type Images interface {
 	DeleteImagesByUserID(userID int) error
 }
 
-type S3service interface {
-	PutObject() error
-	DeleteObject(filename string) error
-}
-
-func NewService(repos *repository.Repository, client *minio.Client) *Service {
+func NewService(repos *repository.Repository) *Service {
 	return &Service{
 		Images: NewImagesService(repos.Images),
 	}

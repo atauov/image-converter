@@ -42,6 +42,7 @@ type S3Server struct {
 
 type RedisServer struct {
 	Address string `yaml:"address" env-default:"localhost:6379"`
+	Workers int    `yaml:"workers" env-default:"5"`
 }
 
 func MustLoad() *Config {

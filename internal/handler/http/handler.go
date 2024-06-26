@@ -1,4 +1,4 @@
-package handler
+package http
 
 import (
 	"github.com/atauov/image-converter/internal/config"
@@ -20,10 +20,6 @@ func NewHandler(services *service.Service, cfg *config.HTTPServer) *Handlers {
 
 func (h *Handlers) InitRoutes() *gin.Engine {
 	router := gin.New()
-
-	router.GET("/", func(context *gin.Context) {
-		context.JSON(200, "HELLO")
-	})
 
 	api := router.Group("/api")
 	{

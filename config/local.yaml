@@ -22,3 +22,4 @@ s3server:
 
 redis:
   address: "localhost:6000"
+  workers: 10

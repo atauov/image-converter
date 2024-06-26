@@ -4,12 +4,12 @@ import (
 	"context"
 	app "github.com/atauov/image-converter"
 	"github.com/atauov/image-converter/internal/config"
-	"github.com/atauov/image-converter/internal/handler"
+	"github.com/atauov/image-converter/internal/handler/http"
 	"github.com/atauov/image-converter/internal/lib/logger/sl"
-	"github.com/atauov/image-converter/internal/ports/redismq"
 	"github.com/atauov/image-converter/internal/repository"
 	"github.com/atauov/image-converter/internal/repository/postgres"
 	"github.com/atauov/image-converter/internal/service"
+	"github.com/atauov/image-converter/internal/worker"
 	"github.com/joho/godotenv"
 	lg "log"
 	"log/slog"
@@ -47,21 +47,13 @@ func main() {
 		os.Exit(1)
 	}
 
-	s3conn, err := service.S3Connection(&cfg.S3Server)
-	if err != nil {
-		log.Error("failed to init S3 connection", sl.Err(err))
-	}
+	asyncClient := worker.NewClient(&cfg.RedisServer)
 
-	redisClient := redismq.NewRedisClient(&cfg.RedisServer)
-	defer redisClient.Close()
-
-	rmq := redismq.NewRedisMQ(redisClient)
-	_ = rmq
-	//TODO change layers, add rmq to service or adapter
+	_ = asyncClient
 
 	repo := repository.NewRepository(db)
-	services := service.NewService(repo, s3conn)
-	handlers := handler.NewHandler(services, &cfg.HTTPServer)
+	services := service.NewService(repo)
+	handlers := http.NewHandler(services, &cfg.HTTPServer)
 
 	srv := new(app.Server)
 
@@ -73,6 +65,13 @@ func main() {
 	}()
 
 	log.Info("server started")
+
+	asyncSrv := worker.NewServer(&cfg.RedisServer)
+	if err = asyncSrv.Start(); err != nil {
+		log.Error("failed to start async worker", sl.Err(err))
+		return
+	}
+	log.Info("async server started")
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)

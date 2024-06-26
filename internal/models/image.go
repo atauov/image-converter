@@ -11,6 +11,7 @@ type Image struct {
 	SizeMedium  string    `gorm:"size_medium" json:"size_medium"`
 	SizeSmall   string    `gorm:"size_small" json:"size_small"`
 	IsDone      bool      `gorm:"is_done" json:"is_done"`
+	IsDeleted   bool      `gorm:"is_deleted" json:"is_deleted"`
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
 	DeletedAt   time.Time `json:"deleted_at,omitempty"`
