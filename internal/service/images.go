@@ -14,6 +14,7 @@ func NewImagesService(repo repository.Images) *ImagesService {
 }
 
 func (s *ImagesService) CreateImage(imageItem models.Image) error {
+
 	return s.repo.CreateImage(imageItem)
 }
 

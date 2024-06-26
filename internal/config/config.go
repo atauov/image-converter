@@ -55,6 +55,12 @@ func MustLoad() *Config {
 		log.Fatalf("cannot read config: %s", err)
 	}
 
+	if _, err := os.Stat(cfg.UploadDir); os.IsNotExist(err) {
+		if err = os.Mkdir(cfg.UploadDir, os.ModePerm); err != nil {
+			log.Fatalf("cannot create directory for tmp images: %s", err)
+		}
+	}
+
 	cfg.Database.Password = os.Getenv("DB_PASSWORD")
 	cfg.S3Server.SecretKey = os.Getenv("S3_SECRET_KEY")
 	cfg.S3Server.AccessKey = os.Getenv("S3_ACCESS_KEY")
