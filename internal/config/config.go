@@ -12,7 +12,7 @@ type Config struct {
 	HTTPServer  `yaml:"http_server"`
 	Database    `yaml:"database"`
 	S3Server    `yaml:"s3server"`
-	RedisServer `yaml:"redismq"`
+	RedisServer `yaml:"redis"`
 }
 
 type HTTPServer struct {

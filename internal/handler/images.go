@@ -10,6 +10,11 @@ import (
 	"strconv"
 )
 
+type Pagination struct {
+	Page  int `form:"page"`
+	Limit int `form:"limit"`
+}
+
 func (h *Handlers) uploadImage(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -57,7 +62,7 @@ func (h *Handlers) uploadImage(c *gin.Context) {
 
 	fmt.Println(image)
 
-	//TODO send to MQ job
+	//TODO send to RMQ job
 
 	c.JSON(http.StatusOK, resp.OK())
 }
@@ -79,24 +84,73 @@ func (h *Handlers) changeImage(c *gin.Context) {
 	_ = id
 	//TODO change images
 	//TODO resend img
+	//TODO how to change? w/o auth?
 }
 
 func (h *Handlers) getAllImages(c *gin.Context) {
-	//TODO return first page
-	//TODO make pagination
+	var pagination Pagination
+
+	if err := c.ShouldBindQuery(&pagination); err != nil {
+		c.JSON(http.StatusBadRequest, resp.Error("failed to bind query"))
+		return
+	}
+
+	if pagination.Page == 0 {
+		pagination.Page = 1
+	}
+	if pagination.Limit == 0 {
+		pagination.Limit = 10
+	}
+
+	offset := (pagination.Page - 1) * pagination.Limit
+
+	images, err := h.services.GetAllImages(pagination.Limit, offset)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, resp.Error(err.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, images)
 }
 
 func (h *Handlers) getByKey(c *gin.Context) {
-	key := c.Param("key")
-	_ = key
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, resp.Error("user id should be numeric"))
+		return
+	}
+
+	images, err := h.services.GetImagesByUserID(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, resp.Error(err.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, images)
 }
 
 func (h *Handlers) deleteByURL(c *gin.Context) {
 	url := c.Param("url")
-	_ = url
+
+	if err := h.services.DeleteImageByURL(url); err != nil {
+		c.JSON(http.StatusInternalServerError, resp.Error(err.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, resp.OK())
 }
 
 func (h *Handlers) deleteByKey(c *gin.Context) {
-	key := c.Param("key")
-	_ = key
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, resp.Error("user id should be numeric"))
+		return
+	}
+
+	if err = h.services.DeleteImagesByUserID(id); err != nil {
+		c.JSON(http.StatusInternalServerError, resp.Error("delete image err"))
+		return
+	}
+
+	c.JSON(http.StatusOK, resp.OK())
 }

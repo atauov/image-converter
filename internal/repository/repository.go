@@ -8,7 +8,7 @@ import (
 
 type Images interface {
 	CreateImage(imageItem models.Image) error
-	GetAllImages() ([]models.Image, error)
+	GetAllImages(limit, offset int) ([]models.Image, error)
 	UpdateImage(imageID int, imageItem models.Image) error
 	GetImagesByUserID(userID int) ([]models.Image, error)
 	DeleteImageByURL(URL string) error

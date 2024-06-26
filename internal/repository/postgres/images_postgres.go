@@ -24,9 +24,9 @@ func (r *ImagesPostgres) CreateImage(imageItem models.Image) error {
 	return nil
 }
 
-func (r *ImagesPostgres) GetAllImages() ([]models.Image, error) {
+func (r *ImagesPostgres) GetAllImages(limit, offset int) ([]models.Image, error) {
 	var images []models.Image
-	if err := r.db.Find(&images).Error; err != nil {
+	if err := r.db.Limit(limit).Offset(offset).Find(&images).Error; err != nil {
 		return nil, err
 	}
 

@@ -18,8 +18,8 @@ func (s *ImagesService) CreateImage(imageItem models.Image) error {
 	return s.repo.CreateImage(imageItem)
 }
 
-func (s *ImagesService) GetAllImages() ([]models.Image, error) {
-	return s.repo.GetAllImages()
+func (s *ImagesService) GetAllImages(limit, offset int) ([]models.Image, error) {
+	return s.repo.GetAllImages(limit, offset)
 }
 
 func (s *ImagesService) UpdateImage(imageID int, imageItem models.Image) error {

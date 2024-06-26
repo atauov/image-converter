@@ -31,7 +31,7 @@ func (h *Handlers) InitRoutes() *gin.Engine {
 		api.PUT("/:id", h.changeImage)
 		api.GET("/", h.getAllImages)
 		api.GET("/:id", h.getByKey)
-		api.DELETE("/link/:id", h.deleteByURL)
+		api.DELETE("/link/:url", h.deleteByURL)
 		api.DELETE("/:id", h.deleteByKey)
 	}
 

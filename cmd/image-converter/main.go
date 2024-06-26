@@ -57,6 +57,7 @@ func main() {
 
 	rmq := redismq.NewRedisMQ(redisClient)
 	_ = rmq
+	//TODO change layers, add rmq to service or adapter
 
 	repo := repository.NewRepository(db)
 	services := service.NewService(repo, s3conn)
