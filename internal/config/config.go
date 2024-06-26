@@ -8,10 +8,11 @@ import (
 )
 
 type Config struct {
-	Env        string `yaml:"env" env-default:"local" env-required:"true"`
-	HTTPServer `yaml:"http_server"`
-	Database   `yaml:"database"`
-	S3Server   `yaml:"s3server"`
+	Env         string `yaml:"env" env-default:"local" env-required:"true"`
+	HTTPServer  `yaml:"http_server"`
+	Database    `yaml:"database"`
+	S3Server    `yaml:"s3server"`
+	RedisServer `yaml:"redismq"`
 }
 
 type HTTPServer struct {
@@ -37,6 +38,10 @@ type S3Server struct {
 	Bucket    string `yaml:"bucket_name"`
 	AccessKey string
 	SecretKey string
+}
+
+type RedisServer struct {
+	Address string `yaml:"address" env-default:"localhost:6379"`
 }
 
 func MustLoad() *Config {

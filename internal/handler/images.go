@@ -50,6 +50,11 @@ func (h *Handlers) uploadImage(c *gin.Context) {
 		IsDone:   false,
 	}
 
+	if err = h.services.Images.CreateImage(image); err != nil {
+		c.JSON(http.StatusInternalServerError, resp.Error("create image err"))
+		return
+	}
+
 	fmt.Println(image)
 
 	//TODO send to MQ job

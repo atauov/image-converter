@@ -14,7 +14,7 @@ func NewImagesService(repo repository.Images) *ImagesService {
 }
 
 func (s *ImagesService) CreateImage(imageItem models.Image) error {
-
+	fillerLink(&imageItem)
 	return s.repo.CreateImage(imageItem)
 }
 

@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS images
     size_medium TEXT NOT NULL,
     size_small TEXT NOT NULL,
     is_done BOOLEAN DEFAULT FALSE,
+    is_deleted BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP

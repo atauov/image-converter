@@ -6,6 +6,7 @@ import (
 	"github.com/atauov/image-converter/internal/config"
 	"github.com/atauov/image-converter/internal/handler"
 	"github.com/atauov/image-converter/internal/lib/logger/sl"
+	"github.com/atauov/image-converter/internal/ports/redismq"
 	"github.com/atauov/image-converter/internal/repository"
 	"github.com/atauov/image-converter/internal/repository/postgres"
 	"github.com/atauov/image-converter/internal/service"
@@ -40,15 +41,26 @@ func main() {
 
 	log.Debug("debug messages are enabled")
 
-	db, err := postgres.NewPostgresDB(cfg.Database)
+	db, err := postgres.NewPostgresDB(&cfg.Database)
 	if err != nil {
 		log.Error("failed to init postgres", sl.Err(err))
 		os.Exit(1)
 	}
 
+	s3conn, err := service.S3Connection(&cfg.S3Server)
+	if err != nil {
+		log.Error("failed to init S3 connection", sl.Err(err))
+	}
+
+	redisClient := redismq.NewRedisClient(&cfg.RedisServer)
+	defer redisClient.Close()
+
+	rmq := redismq.NewRedisMQ(redisClient)
+	_ = rmq
+
 	repo := repository.NewRepository(db)
-	services := service.NewService(repo)
-	handlers := handler.NewHandler(services, cfg)
+	services := service.NewService(repo, s3conn)
+	handlers := handler.NewHandler(services, &cfg.HTTPServer)
 
 	srv := new(app.Server)
 

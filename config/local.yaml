@@ -19,3 +19,6 @@ s3server:
   region: "eu-north-1"
   bucket_name: "my-bucket-webp"
   url: "http://dwah87zivx7wf.cloudfront.net" #CDN domain
+
+redis:
+  address: "localhost:6000"

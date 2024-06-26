@@ -8,10 +8,10 @@ import (
 
 type Handlers struct {
 	services *service.Service
-	cfg      *config.Config
+	cfg      *config.HTTPServer
 }
 
-func NewHandler(services *service.Service, cfg *config.Config) *Handlers {
+func NewHandler(services *service.Service, cfg *config.HTTPServer) *Handlers {
 	return &Handlers{
 		services: services,
 		cfg:      cfg,
