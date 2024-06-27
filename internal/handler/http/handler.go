@@ -27,10 +27,10 @@ func (h *Handlers) InitRoutes() *gin.Engine {
 	api := router.Group("/api")
 	{
 		api.POST("/:id", h.uploadImage)
-		api.PUT("/:id", h.changeImage)
+		api.PUT("/", h.changeImage)
 		api.GET("/", h.getAllImages)
 		api.GET("/:id", h.getByKey)
-		api.DELETE("/link/:url", h.deleteByURL)
+		api.DELETE("/link/", h.deleteByURL)
 		api.DELETE("/:id", h.deleteByKey)
 	}
 

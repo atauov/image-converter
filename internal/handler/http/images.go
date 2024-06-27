@@ -83,7 +83,10 @@ func (h *Handlers) uploadImage(c *gin.Context) {
 }
 
 func (h *Handlers) changeImage(c *gin.Context) {
-	id := c.Param("id")
+	id, err := strconv.Atoi(c.Query("image_id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, resp.Error("image id should be numeric"))
+	}
 
 	file, err := c.FormFile("image")
 	if err != nil {
@@ -96,10 +99,50 @@ func (h *Handlers) changeImage(c *gin.Context) {
 		return
 	}
 
-	_ = id
-	//TODO change images
-	//TODO resend img
-	//TODO how to change? w/o auth?
+	open, err := file.Open()
+	if err != nil {
+		c.JSON(http.StatusBadRequest, resp.Error("failed to open file"))
+		return
+	}
+	defer open.Close()
+
+	filename := filepath.Base(file.Filename)
+	filename = strings.ToLower(strings.ReplaceAll(filename, " ", "_"))
+
+	path := filepath.Join(h.cfg.UploadDir, filename)
+
+	if err = c.SaveUploadedFile(file, path); err != nil {
+		c.JSON(http.StatusInternalServerError, resp.Error("upload file err"))
+		return
+	}
+
+	image := models.Image{
+		UserID:   id,
+		Filename: path,
+		IsDone:   false,
+	}
+
+	if err = h.services.UpdateImage(id, image); err != nil {
+		c.JSON(http.StatusInternalServerError, resp.Error("update image err"))
+		return
+	}
+
+	task, err := worker.NewImageUploadTask(path)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, resp.Error(fmt.Sprintf("could not create task: %v", err)))
+		return
+	}
+
+	info, err := h.asynqC.Client.Enqueue(task)
+	if err != nil {
+		log.Printf("could not enqueue task: %v", err)
+		c.JSON(http.StatusInternalServerError, resp.Error(fmt.Sprintf("could not enqueue task: %v", err)))
+		return
+	}
+
+	log.Printf("enqueued task: id=%s queue=%s", info.ID, info.Queue)
+
+	c.JSON(http.StatusOK, resp.OK())
 }
 
 func (h *Handlers) getAllImages(c *gin.Context) {
@@ -145,12 +188,27 @@ func (h *Handlers) getByKey(c *gin.Context) {
 }
 
 func (h *Handlers) deleteByURL(c *gin.Context) {
-	url := c.Param("url")
+	url := c.Query("url")
 
 	if err := h.services.DeleteImageByURL(url); err != nil {
 		c.JSON(http.StatusInternalServerError, resp.Error(err.Error()))
 		return
 	}
+
+	task, err := worker.NewImageDeleteTask(url)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, resp.Error(fmt.Sprintf("could not create task: %v", err)))
+		return
+	}
+
+	info, err := h.asynqC.Client.Enqueue(task)
+	if err != nil {
+		log.Printf("could not enqueue task: %v", err)
+		c.JSON(http.StatusInternalServerError, resp.Error(fmt.Sprintf("could not enqueue task: %v", err)))
+		return
+	}
+
+	log.Printf("enqueued task: id=%s queue=%s", info.ID, info.Queue)
 
 	c.JSON(http.StatusOK, resp.OK())
 }

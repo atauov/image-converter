@@ -51,13 +51,19 @@ func encodeToWebp(img image.Image) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func modifyFilename(filePath string, num uint) string {
+func modifyFilename(filePath string, size uint) string {
+	var newName string
 	base := filepath.Base(filePath)
 
 	ext := filepath.Ext(base)
 	name := strings.TrimSuffix(base, ext)
 
-	newName := fmt.Sprintf("%s%s%d%s", name, "_", num, EXT)
+	switch size {
+	case ORIGINAL_SIZE:
+		newName = fmt.Sprintf("%s%s", name, EXT)
+	default:
+		newName = fmt.Sprintf("%s%s%d%s", name, "_", size, EXT)
+	}
 
 	return newName
 }
@@ -65,7 +71,7 @@ func modifyFilename(filePath string, num uint) string {
 func collectBuffs(img image.Image, imgMap map[uint][]byte) error {
 	sizes := []uint{ORIGINAL_SIZE, LARGE_SIZE, MEDIUM_SIZE, SMALL_SIZE}
 	for _, size := range sizes {
-		if size != 0 {
+		if size != ORIGINAL_SIZE {
 			img = resizeImg(img, size)
 		}
 
@@ -78,4 +84,22 @@ func collectBuffs(img image.Image, imgMap map[uint][]byte) error {
 	}
 
 	return nil
+}
+
+func getFilesFromUrl(url string) [4]string {
+	files := [4]string{}
+	fileName := filepath.Base(url)
+	files[0] = fileName
+
+	name := strings.TrimSuffix(filepath.Base(fileName), EXT)
+
+	files[1] = fmt.Sprintf("%s%s%d%s", name, "_", LARGE_SIZE, EXT)
+	files[2] = fmt.Sprintf("%s%s%d%s", name, "_", MEDIUM_SIZE, EXT)
+	files[3] = fmt.Sprintf("%s%s%d%s", name, "_", SMALL_SIZE, EXT)
+
+	return files
+}
+
+func deleteLocalFile(fileName string) error {
+	return os.Remove(fileName)
 }

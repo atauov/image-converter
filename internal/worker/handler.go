@@ -11,8 +11,9 @@ import (
 )
 
 const (
-	TypeImageUpload = "image:upload"
-	TypeImageDelete = "image:delete"
+	TypeImageUpload      = "image:upload"
+	TypeImageDelete      = "image:delete"
+	TypeLocalImageDelete = "local:image:delete"
 )
 
 type ImageUploadPayload struct {
@@ -22,6 +23,10 @@ type ImageUploadPayload struct {
 
 type ImageDeletePayload struct {
 	ImageURL string
+}
+
+type ImageLocalDeletePayload struct {
+	Filename string
 }
 
 func (w *Worker) HandleImageUploadTask(ctx context.Context, task *asynq.Task) error {
@@ -47,20 +52,23 @@ func (w *Worker) HandleImageUploadTask(ctx context.Context, task *asynq.Task) er
 	}
 
 	for size, buff := range imgBuffs {
-		var newName string
-		if size != 0 {
-			newName = modifyFilename(p.Filename, size)
-		}
+		newName := modifyFilename(p.Filename, size)
 
 		sizeOfFile := int64(len(buff))
 		reader := bytes.NewReader(buff)
 
 		if err = s3storage.UploadToS3(w.S3, reader, sizeOfFile, newName); err != nil {
 			log.Println(err)
-			return fmt.Errorf("upload to s3 failed: %v: %w", err, asynq.SkipRetry)
+			return fmt.Errorf("uploading to s3 failed: %v: %w", err, asynq.SkipRetry)
 		}
 
 		log.Println("Successfully uploaded image", newName)
+	}
+
+	if err = deleteLocalFile(p.Filename); err != nil {
+		log.Println(err)
+	} else {
+		log.Println("Successfully deleted image", p.Filename)
 	}
 
 	return nil
@@ -70,8 +78,19 @@ func (w *Worker) HandleImageDeleteTask(ctx context.Context, task *asynq.Task) er
 	var p ImageDeletePayload
 	if err := json.Unmarshal(task.Payload(), &p); err != nil {
 		log.Println(err)
-
 		return fmt.Errorf("json.Unmarshal failed: %v: %w", err, asynq.SkipRetry)
+	}
+
+	files := getFilesFromUrl(p.ImageURL)
+
+	for _, file := range files {
+		fmt.Println(file)
+		if err := s3storage.DeleteFromS3(w.S3, file); err != nil {
+			log.Println(err)
+			return fmt.Errorf("deleting from s3 failed: %v: %w", err, asynq.SkipRetry)
+		}
+
+		log.Println("Successfully deleted image", file)
 	}
 
 	return nil

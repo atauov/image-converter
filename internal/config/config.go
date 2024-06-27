@@ -24,7 +24,7 @@ type HTTPServer struct {
 }
 
 type Database struct {
-	Host     string `yaml:"host" env-default:"localhost"`
+	Host     string `yaml:"db_host" env-default:"localhost"`
 	Port     string `yaml:"port" env-default:"5432"`
 	User     string `yaml:"user" env-default:"postgres"`
 	Password string
@@ -41,7 +41,7 @@ type S3Server struct {
 }
 
 type RedisServer struct {
-	Address string `yaml:"address" env-default:"localhost:6379"`
+	Address string `yaml:"address"`
 	Workers int    `yaml:"workers" env-default:"5"`
 }
 
@@ -67,7 +67,7 @@ func MustLoad() *Config {
 		}
 	}
 
-	cfg.Database.Password = os.Getenv("DB_PASSWORD")
+	cfg.Database.Password = os.Getenv("POSTGRES_PASSWORD")
 	cfg.S3Server.SecretKey = os.Getenv("S3_SECRET_KEY")
 	cfg.S3Server.AccessKey = os.Getenv("S3_ACCESS_KEY")
 

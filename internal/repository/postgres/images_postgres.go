@@ -35,8 +35,13 @@ func (r *ImagesPostgres) GetAllImages(limit, offset int) ([]models.Image, error)
 
 func (r *ImagesPostgres) UpdateImage(imageID int, imageItem models.Image) error {
 	updateData := map[string]interface{}{
-		"filename": imageItem.Filename,
-		"is_done":  imageItem.IsDone,
+		"filename":     imageItem.Filename,
+		"original_url": imageItem.OriginalUrl,
+		"size_large":   imageItem.SizeLarge,
+		"size_medium":  imageItem.SizeMedium,
+		"size_small":   imageItem.SizeSmall,
+		"is_done":      imageItem.IsDone,
+		"updated_at":   time.Now(),
 	}
 	return r.db.Model(&models.Image{}).Where("id = ?", imageID).Updates(updateData).Error
 }

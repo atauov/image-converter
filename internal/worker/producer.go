@@ -24,3 +24,12 @@ func NewImageDeleteTask(url string) (*asynq.Task, error) {
 
 	return asynq.NewTask(TypeImageDelete, payload), nil
 }
+
+func NewLocalImageDeleteTask(filename string) (*asynq.Task, error) {
+	payload, err := json.Marshal(ImageLocalDeletePayload{filename})
+	if err != nil {
+		return nil, err
+	}
+
+	return asynq.NewTask(TypeLocalImageDelete, payload), nil
+}

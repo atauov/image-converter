@@ -10,7 +10,7 @@ import (
 
 const CONTENT_TYPE = "image/webp"
 
-var bucketName string
+var bucketName string //TODO change on cfg
 
 func S3Connection(cfg *config.S3Server) (*minio.Client, error) {
 	s3Client, err := minio.New(cfg.Endpoint, &minio.Options{
@@ -29,6 +29,15 @@ func UploadToS3(s3Client *minio.Client, file io.Reader, size int64, name string)
 		size, minio.PutObjectOptions{ContentType: CONTENT_TYPE})
 
 	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func DeleteFromS3(s3Client *minio.Client, filename string) error {
+	if err := s3Client.RemoveObject(context.Background(), bucketName, filename,
+		minio.RemoveObjectOptions{ForceDelete: true}); err != nil {
 		return err
 	}
 

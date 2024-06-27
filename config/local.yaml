@@ -8,7 +8,7 @@ http_server:
   max_size: 5 # Mb
 
 database:
-  host: "localhost"
+  db_host: "localhost"
   username: "postgres"
   port: "5432"
   db_name: "postgres"
@@ -21,5 +21,5 @@ s3server:
   url: "http://dwah87zivx7wf.cloudfront.net" #CDN domain
 
 redis:
-  address: "localhost:6000"
+  address: "localhost:6379"
   workers: 10

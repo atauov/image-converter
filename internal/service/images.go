@@ -23,6 +23,7 @@ func (s *ImagesService) GetAllImages(limit, offset int) ([]models.Image, error) 
 }
 
 func (s *ImagesService) UpdateImage(imageID int, imageItem models.Image) error {
+	fillerLink(&imageItem)
 	return s.repo.UpdateImage(imageID, imageItem)
 }
 
