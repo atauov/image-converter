@@ -48,12 +48,11 @@ func main() {
 	}
 
 	asyncClient := worker.NewClient(&cfg.RedisServer)
-
-	_ = asyncClient
+	defer asyncClient.Close()
 
 	repo := repository.NewRepository(db)
 	services := service.NewService(repo)
-	handlers := http.NewHandler(services, &cfg.HTTPServer)
+	handlers := http.NewHandler(services, &cfg.HTTPServer, asyncClient)
 
 	srv := new(app.Server)
 
@@ -66,8 +65,8 @@ func main() {
 
 	log.Info("server started")
 
-	asyncSrv := worker.NewServer(&cfg.RedisServer)
-	if err = asyncSrv.Start(); err != nil {
+	asyncSrv := worker.NewServer(cfg)
+	if err = asyncSrv.Start(asyncSrv.InitRoutes()); err != nil {
 		log.Error("failed to start async worker", sl.Err(err))
 		return
 	}

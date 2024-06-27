@@ -6,7 +6,9 @@ import (
 )
 
 func NewImageUploadTask(filename string) (*asynq.Task, error) {
-	payload, err := json.Marshal(ImageUploadPayload{Filename: filename})
+	payload, err := json.Marshal(ImageUploadPayload{
+		Filename: filename},
+	)
 	if err != nil {
 		return nil, err
 	}

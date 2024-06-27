@@ -3,18 +3,21 @@ package http
 import (
 	"github.com/atauov/image-converter/internal/config"
 	"github.com/atauov/image-converter/internal/service"
+	"github.com/atauov/image-converter/internal/worker"
 	"github.com/gin-gonic/gin"
 )
 
 type Handlers struct {
 	services *service.Service
 	cfg      *config.HTTPServer
+	asynqC   *worker.Client
 }
 
-func NewHandler(services *service.Service, cfg *config.HTTPServer) *Handlers {
+func NewHandler(services *service.Service, cfg *config.HTTPServer, worker *worker.Client) *Handlers {
 	return &Handlers{
 		services: services,
 		cfg:      cfg,
+		asynqC:   worker,
 	}
 }
 

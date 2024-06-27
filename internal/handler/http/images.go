@@ -4,10 +4,13 @@ import (
 	"fmt"
 	resp "github.com/atauov/image-converter/internal/lib/api/response"
 	"github.com/atauov/image-converter/internal/models"
+	"github.com/atauov/image-converter/internal/worker"
 	"github.com/gin-gonic/gin"
+	"log"
 	"net/http"
 	"path/filepath"
 	"strconv"
+	"strings"
 )
 
 type Pagination struct {
@@ -41,8 +44,9 @@ func (h *Handlers) uploadImage(c *gin.Context) {
 	defer open.Close()
 
 	filename := filepath.Base(file.Filename)
+	filename = strings.ToLower(strings.ReplaceAll(filename, " ", "_"))
+
 	path := filepath.Join(h.cfg.UploadDir, filename)
-	fmt.Println(filename)
 
 	if err = c.SaveUploadedFile(file, path); err != nil {
 		c.JSON(http.StatusInternalServerError, resp.Error("upload file err"))
@@ -51,7 +55,7 @@ func (h *Handlers) uploadImage(c *gin.Context) {
 
 	image := models.Image{
 		UserID:   id,
-		Filename: filename,
+		Filename: path,
 		IsDone:   false,
 	}
 
@@ -60,9 +64,20 @@ func (h *Handlers) uploadImage(c *gin.Context) {
 		return
 	}
 
-	fmt.Println(image)
+	task, err := worker.NewImageUploadTask(path)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, resp.Error(fmt.Sprintf("could not create task: %v", err)))
+		return
+	}
 
-	//TODO send to RMQ job
+	info, err := h.asynqC.Client.Enqueue(task)
+	if err != nil {
+		log.Printf("could not enqueue task: %v", err)
+		c.JSON(http.StatusInternalServerError, resp.Error(fmt.Sprintf("could not enqueue task: %v", err)))
+		return
+	}
+
+	log.Printf("enqueued task: id=%s queue=%s", info.ID, info.Queue)
 
 	c.JSON(http.StatusOK, resp.OK())
 }
